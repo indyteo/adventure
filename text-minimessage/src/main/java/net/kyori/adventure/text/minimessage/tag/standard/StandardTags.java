@@ -65,7 +65,10 @@ public final class StandardTags {
         ScoreTag.RESOLVER,
         NbtTag.RESOLVER,
         PrideTag.RESOLVER,
-        ShadowColorTag.RESOLVER
+        ShadowColorTag.RESOLVER,
+        DarkenTag.RESOLVER,
+        LightenTag.RESOLVER,
+        InvertTag.RESOLVER
       )
       .build();
 
@@ -286,6 +289,18 @@ public final class StandardTags {
    */
   public static @NotNull TagResolver shadowColor() {
     return ShadowColorTag.RESOLVER;
+  }
+
+  public static @NotNull TagResolver darken() {
+    return DarkenTag.RESOLVER;
+  }
+
+  public static @NotNull TagResolver lighten() {
+    return LightenTag.RESOLVER;
+  }
+
+  public static @NotNull TagResolver invert() {
+    return InvertTag.RESOLVER;
   }
 
   /**
