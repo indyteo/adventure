@@ -24,6 +24,7 @@
 package net.kyori.adventure.text.minimessage.tag;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.minimessage.tree.Node;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -66,4 +67,8 @@ public /* non-sealed */ interface Modifying extends Tag {
    * @since 4.10.0
    */
   Component apply(final @NotNull Component current, final int depth);
+
+  default Component apply(final @NotNull Component current, final int depth, final @NotNull Style parentStyle) {
+    return apply(current, depth);
+  }
 }

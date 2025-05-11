@@ -31,6 +31,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.minimessage.internal.parser.ParsingExceptionImpl;
 import net.kyori.adventure.text.minimessage.internal.parser.Token;
 import net.kyori.adventure.text.minimessage.internal.parser.TokenParser;
@@ -207,10 +208,10 @@ final class MiniMessageParser {
 
   @NotNull Component parseFormat(final @NotNull ContextImpl context) {
     final ElementNode root = this.parseToTree(context);
-    return Objects.requireNonNull(context.postProcessor().apply(this.treeToComponent(root, context)), "Post-processor must not return null");
+    return Objects.requireNonNull(context.postProcessor().apply(this.treeToComponent(root, context, Style.empty())), "Post-processor must not return null");
   }
 
-  @NotNull Component treeToComponent(final @NotNull ElementNode node, final @NotNull ContextImpl context) {
+  @NotNull Component treeToComponent(final @NotNull ElementNode node, final @NotNull ContextImpl context, final @NotNull Style parentStyle) {
     Component comp = Component.empty();
     Tag tag = null;
     if (node instanceof ValueNode) {
@@ -235,17 +236,18 @@ final class MiniMessageParser {
     }
 
     if (!node.unsafeChildren().isEmpty()) {
+      Style style = parentStyle.merge(comp.style());
       final List<Component> children = new ArrayList<>(comp.children().size() + node.children().size());
       children.addAll(comp.children());
       for (final ElementNode child : node.unsafeChildren()) {
-        children.add(this.treeToComponent(child, context));
+        children.add(this.treeToComponent(child, context, style));
       }
       comp = comp.children(children);
     }
 
     // special case for gradient and stuff
     if (tag instanceof Modifying) {
-      comp = this.handleModifying((Modifying) tag, comp, 0);
+      comp = this.handleModifying((Modifying) tag, comp, 0, parentStyle);
     }
 
     final Consumer<String> debug = context.debugOutput();
@@ -267,10 +269,11 @@ final class MiniMessageParser {
     }
   }
 
-  private Component handleModifying(final Modifying modTransformation, final Component current, final int depth) {
-    Component newComp = modTransformation.apply(current, depth);
+  private Component handleModifying(final Modifying modTransformation, final Component current, final int depth, final @NotNull Style parentStyle) {
+    Component newComp = modTransformation.apply(current, depth, parentStyle);
+    Style style = parentStyle.merge(newComp.style());
     for (final Component child : current.children()) {
-      newComp = newComp.append(this.handleModifying(modTransformation, child, depth + 1));
+      newComp = newComp.append(this.handleModifying(modTransformation, child, depth + 1, style));
     }
     return newComp;
   }
