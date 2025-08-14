@@ -2601,6 +2601,19 @@ public sealed interface Component extends ComponentBuilderApplicable, ComponentL
   }
 
   /**
+   * Create a new component equivalent to this one but with neither content nor style, and a single depth of children.
+   *
+   * <p>This is <b>not</b> an optimization method. The returned component is likely to be bigger.</p>
+   *
+   * @return the linearized component
+   * @since 5.1.0
+   */
+  @ScopedComponentOverrideNotRequired
+  default Component linear() {
+    return ComponentLinearizer.linearize(this);
+  }
+
+  /**
    * Returns an iterable view of this component.
    *
    * @param type the type
