@@ -2613,6 +2613,39 @@ public sealed interface Component extends ComponentBuilderApplicable, ComponentL
     return ComponentLinearizer.linearize(this);
   }
 
+  @ScopedComponentOverrideNotRequired
+  default List<Component> split(char separator) {
+    List<Component> linearized = this.linear().children();
+    List<Component> split = new ArrayList<>();
+    TextComponent.Builder current = Component.text();
+    for (Component comp : linearized) {
+      if (comp instanceof TextComponent text && !(comp instanceof VirtualComponent)) {
+        String content = text.content();
+        int start = 0, end;
+        do {
+          end = content.indexOf(separator, start);
+          boolean found = false;
+          if (end == -1)
+            end = content.length();
+          else
+            found = true;
+          if (start != end)
+            current.append(text.content(content.substring(start, end)));
+          if (found) {
+            if (!current.children().isEmpty())
+              split.add(current.build().compact());
+            current = Component.text();
+          }
+          start = end + 1;
+        } while (start < content.length());
+      } else
+        current.append(comp);
+    }
+    if (!current.children().isEmpty())
+      split.add(current.build().compact());
+    return split;
+  }
+
   /**
    * Returns an iterable view of this component.
    *
